@@ -1,6 +1,7 @@
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
 
+const tokenService = require('../auth/token-service');
 const { authenticate } = require('../auth/authenticate');
 const Users = require('./models.js');
 
@@ -27,7 +28,25 @@ function register(req, res) {
 
 function login(req, res) {
   // implement user login
-}
+  let {username, password} = req.body;
+
+  Users.findBy({username})
+    .first()
+    .then(user => {
+      if (user && bcrypt.compareSync(password, user.password)) {
+        const token = tokenService.generateToken(user);
+        res.status(200).json({
+          message: 'Navigate to /api/jokes to see jokes',
+          token
+        });
+      } else {
+        res.status(401).json({message: 'Boo! Invalid credentials! No jokes for you!'});
+      }
+    })
+    .catch(error => {
+      res.status(500).json(error);
+    });
+  };
 
 function getJokes(req, res) {
   const requestOptions = {
