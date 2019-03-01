@@ -34,7 +34,9 @@ function login(req, res) {
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
+        console.log(username);
         const token = tokenService.generateToken(user);
+        
         res.status(200).json({
           message: 'Navigate to /api/jokes to see jokes',
           token
